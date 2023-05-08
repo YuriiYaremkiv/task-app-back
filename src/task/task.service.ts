@@ -8,6 +8,10 @@ export class TaskService {
   constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
 
   async getCards() {
-    return 'hello this will be your card';
+    return 'get all cards';
+  }
+
+  async addCard() {
+    return 'add cart';
   }
 }
