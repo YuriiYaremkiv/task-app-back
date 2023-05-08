@@ -8,7 +8,7 @@ import { TaskModule } from './task/task.module';
 import { UsersModule } from './users/users.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
-import { UsersController } from 'users/users.controller';
+import { UsersController } from './users/users.controller';
 
 @Module({
   controllers: [AppController, TaskController, AuthController, UsersController],
