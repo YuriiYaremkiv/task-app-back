@@ -43,6 +43,7 @@ export class TaskService {
   }
 
   async updateBoard({ user, boardId, taskDto }) {
+    console.log('this is console', user, boardId, taskDto);
     try {
       const updatedTask = await this.taskModel.findOneAndUpdate(
         { userId: user._id, 'boards.id': boardId },
