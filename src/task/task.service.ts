@@ -10,7 +10,7 @@ export class TaskService {
 
   async getBoards(user: any) {
     try {
-      const boards = await this.taskModel.find({ userId: user._id });
+      const boards = await this.taskModel.find({ userId: user.id });
       return boards;
     } catch (err) {
       throw new Error(err.messate);
@@ -19,7 +19,7 @@ export class TaskService {
 
   async addBoard({ user, taskDto }) {
     try {
-      const board = await this.taskModel.findOne({ userId: user._id });
+      const board = await this.taskModel.findOne({ userId: user.id });
 
       if (board) {
         const updatedBoard = await this.taskModel.findOneAndUpdate(
@@ -43,10 +43,9 @@ export class TaskService {
   }
 
   async updateBoard({ user, boardId, taskDto }) {
-    console.log('this is console', user, boardId, taskDto);
     try {
       const updatedTask = await this.taskModel.findOneAndUpdate(
-        { userId: user._id, 'boards.id': boardId },
+        { userId: user.id, 'boards.id': boardId },
         { $set: { 'boards.$': { id: boardId, ...taskDto } } },
         { new: true },
       );
@@ -60,7 +59,7 @@ export class TaskService {
   async deleteBoard({ user, boardId }) {
     try {
       await this.taskModel.findOneAndUpdate(
-        { userId: user._id },
+        { userId: user.id },
         { $pull: { boards: { id: boardId } } },
         { new: true },
       );
