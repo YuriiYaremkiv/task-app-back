@@ -1,13 +1,15 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { AccessTokenGuard } from 'common/guards/accessToken.guard';
 
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
+  @UseGuards(AccessTokenGuard)
   @Get()
-  getUsers() {
-    return 'Hello';
+  getUserById(@Request() req: any) {
+    const user = req.user;
+    return this.userService.getUserById(user.id);
   }
 }

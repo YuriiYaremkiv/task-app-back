@@ -58,6 +58,9 @@ class Board {
   @IsString()
   title: string;
 
+  labels: [];
+  color: string;
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => Card)

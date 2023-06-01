@@ -8,6 +8,7 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -19,9 +20,9 @@ export class TaskController {
 
   @UseGuards(AccessTokenGuard)
   @Get()
-  getBoards(@Request() req: any) {
+  getBoards(@Request() req: any, @Query() queryParam: any) {
     const user = req.user;
-    return this.taskService.getBoards(user);
+    return this.taskService.getBoards({ user, queryParam });
   }
 
   @UseGuards(AccessTokenGuard)

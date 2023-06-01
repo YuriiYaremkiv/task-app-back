@@ -13,6 +13,8 @@ export class Task {
     {
       id: string;
       title: string;
+      labels: [{ text: string; color: string }];
+      color: string;
       cards: [
         {
           id: string;

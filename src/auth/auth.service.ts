@@ -34,6 +34,8 @@ export class AuthService {
       password: hashPassword,
     });
 
+    if (!newUser) throw new BadRequestException('Error Databese');
+
     const tokens = await this.getTokens(newUser._id, newUser.username);
     await this.updateRefreshToken(newUser._id, tokens.refreshToken);
     return tokens;

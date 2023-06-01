@@ -3,18 +3,21 @@ import { Model } from 'mongoose';
 import { Task } from '../schema/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import { paginationParams } from 'config/pagination';
 
 @Injectable()
 export class TaskService {
   constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
 
-  async getBoards(user: any) {
-    try {
-      const boards = await this.taskModel.find({ userId: user.id });
-      return boards;
-    } catch (err) {
-      throw new Error(err.messate);
-    }
+  async getBoards({ user, queryParam }: any) {
+    const result: any = await this.taskModel.findOne({ userId: user.id });
+    const boards = result ? result.boards : [];
+    const totalBoards = boards.length;
+
+    const { skip, limit } = paginationParams(queryParam);
+    const slicedBoards = boards.slice(skip, skip + +limit);
+
+    return { boards: slicedBoards, totalBoards };
   }
 
   async addBoard({ user, taskDto }) {
@@ -23,22 +26,22 @@ export class TaskService {
 
       if (board) {
         const updatedBoard = await this.taskModel.findOneAndUpdate(
-          { userId: user._id },
+          { userId: user.id },
           { $push: { boards: { id: uuidv4(), ...taskDto } } },
           { new: true },
         );
 
-        return updatedBoard.boards.pop();
+        return { boards: updatedBoard.boards };
       } else {
         const createdBoard = await this.taskModel.create({
-          userId: user._id,
+          userId: user.id,
           boards: [{ id: uuidv4(), ...taskDto }],
         });
 
-        return createdBoard.boards.pop();
+        return { boards: createdBoard.boards };
       }
     } catch (err) {
-      throw new Error(err.messate);
+      throw new Error(err.message);
     }
   }
 
@@ -50,7 +53,10 @@ export class TaskService {
         { new: true },
       );
 
-      return updatedTask.boards.find((board) => board.id === boardId);
+      const result: any = await this.taskModel.findOne({ userId: user.id });
+      const boards = result ? result.boards : [];
+
+      return { boards };
     } catch (err) {
       throw new Error(err.message);
     }
@@ -58,13 +64,13 @@ export class TaskService {
 
   async deleteBoard({ user, boardId }) {
     try {
-      await this.taskModel.findOneAndUpdate(
+      const updatedBoards = await this.taskModel.findOneAndUpdate(
         { userId: user.id },
         { $pull: { boards: { id: boardId } } },
         { new: true },
       );
 
-      return boardId;
+      return { boards: updatedBoards.boards };
     } catch (err) {
       throw new Error(err.message);
     }
