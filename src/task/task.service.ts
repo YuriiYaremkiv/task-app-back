@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 import { Task } from '../schema/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { paginationParams } from 'config/pagination';
+import { paginationParams } from '../config/pagination';
 
 @Injectable()
 export class TaskService {

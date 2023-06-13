@@ -1,6 +1,6 @@
 import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AccessTokenGuard } from 'common/guards/accessToken.guard';
+import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 
 @Controller('user')
 export class UsersController {

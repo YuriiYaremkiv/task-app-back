@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { AccessTokenGuard } from 'common/guards/accessToken.guard';
+import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 
 @Controller('board')
 export class TaskController {
