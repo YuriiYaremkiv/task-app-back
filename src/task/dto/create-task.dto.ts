@@ -17,6 +17,8 @@ class Task {
 
   @IsString()
   text: string;
+
+  progress: number;
 }
 
 class Label {

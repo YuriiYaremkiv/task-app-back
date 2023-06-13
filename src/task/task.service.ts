@@ -10,12 +10,38 @@ export class TaskService {
   constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
 
   async getBoards({ user, queryParam }: any) {
+    const { query, labels, colors } = queryParam;
+    const { skip, limit } = paginationParams(queryParam);
+
     const result: any = await this.taskModel.findOne({ userId: user.id });
     const boards = result ? result.boards : [];
     const totalBoards = boards.length;
 
-    const { skip, limit } = paginationParams(queryParam);
-    const slicedBoards = boards.slice(skip, skip + +limit);
+    const filteredResult = boards.filter((board: any) => {
+      if (query && !board.title.toLowerCase().includes(query.toLowerCase()))
+        return false;
+
+      if (labels && labels.length === 0) return false;
+      if (labels) {
+        const setOfLabels = new Set(
+          board.labels.map((item: any) => item.label),
+        );
+        const arrayOfSearchLabels = labels.split(',');
+        for (const searchLabel of arrayOfSearchLabels) {
+          if (!setOfLabels.has(searchLabel)) return false;
+        }
+      }
+
+      if (colors && board.color.length === 0) return false;
+      if (colors) {
+        const setOfColors = new Set(colors.split(','));
+        if (!setOfColors.has(board.color)) return false;
+      }
+
+      return true;
+    });
+
+    const slicedBoards = filteredResult.slice(skip, skip + +limit);
 
     return { boards: slicedBoards, totalBoards };
   }
