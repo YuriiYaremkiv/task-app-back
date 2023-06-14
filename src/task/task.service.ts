@@ -56,15 +56,16 @@ export class TaskService {
           { $push: { boards: { id: uuidv4(), ...taskDto } } },
           { new: true },
         );
-
-        return { boards: updatedBoard.boards };
+        const totalBoards = updatedBoard.boards.length;
+        return { boards: updatedBoard.boards, totalBoards };
       } else {
         const createdBoard = await this.taskModel.create({
           userId: user.id,
           boards: [{ id: uuidv4(), ...taskDto }],
         });
 
-        return { boards: createdBoard.boards };
+        const totalBoards = createdBoard.boards.length;
+        return { boards: createdBoard.boards, totalBoards };
       }
     } catch (err) {
       throw new Error(err.message);
@@ -73,16 +74,16 @@ export class TaskService {
 
   async updateBoard({ user, boardId, taskDto }) {
     try {
-      const updatedTask = await this.taskModel.findOneAndUpdate(
+      const updatedAllBoards = await this.taskModel.findOneAndUpdate(
         { userId: user.id, 'boards.id': boardId },
         { $set: { 'boards.$': { id: boardId, ...taskDto } } },
         { new: true },
       );
 
-      const result: any = await this.taskModel.findOne({ userId: user.id });
-      const boards = result ? result.boards : [];
+      const updatedBoard =
+        updatedAllBoards?.boards.find((board) => board.id === boardId) ?? null;
 
-      return { boards };
+      return updatedBoard;
     } catch (err) {
       throw new Error(err.message);
     }
@@ -96,7 +97,8 @@ export class TaskService {
         { new: true },
       );
 
-      return { boards: updatedBoards.boards };
+      const totalBoards = updatedBoards.boards.length;
+      return { boards: updatedBoards.boards, totalBoards };
     } catch (err) {
       throw new Error(err.message);
     }
