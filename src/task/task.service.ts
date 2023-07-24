@@ -3,15 +3,66 @@ import { Model } from 'mongoose';
 import { Task } from '../schema/task.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import { paginationParams } from '../config/pagination';
+import { paginationParams } from '../utils/pagination';
+import { IGetBoardsProps, IAddBoardProps } from './interfaces';
 
 @Injectable()
 export class TaskService {
   constructor(@InjectModel(Task.name) private taskModel: Model<Task>) {}
 
-  async getBoards({ user, queryParam }: any) {
-    const { query, labels, colors } = queryParam;
-    const { skip, limit } = paginationParams(queryParam);
+  async getBoards({ user, reqBoard }: IGetBoardsProps) {
+    return this.getBoardOfDatabase({ user, reqBoard });
+  }
+
+  async addBoard({ user, newBoard, reqBoard }: IAddBoardProps) {
+    const board = await this.taskModel.findOne({ userId: user.id });
+
+    console.log('tilte', typeof newBoard.title);
+    console.log('color', typeof newBoard.color);
+    console.log('labels', Object.prototype.toString.call(newBoard.labels));
+    console.log('cards', Object.prototype.toString.call(newBoard.cards));
+
+    if (!board) {
+      await this.taskModel.create({
+        userId: user.id,
+        boards: [{ id: uuidv4(), ...newBoard }],
+      });
+    } else {
+      await this.taskModel.findOneAndUpdate(
+        { userId: user.id },
+        { $push: { boards: { id: uuidv4(), ...newBoard } } },
+      );
+    }
+
+    return this.getBoardOfDatabase({ user, reqBoard });
+  }
+
+  async updateBoard({ user, boardId, updatedBoard }) {
+    const updatedAllBoards = await this.taskModel.findOneAndUpdate(
+      { userId: user.id, 'boards.id': boardId },
+      { $set: { 'boards.$': { id: boardId, ...updatedBoard } } },
+      { new: true },
+    );
+
+    const board =
+      updatedAllBoards?.boards.find((board) => board.id === boardId) ?? null;
+
+    return board;
+  }
+
+  async deleteBoard({ user, boardId, reqBoard }) {
+    await this.taskModel.findOneAndUpdate(
+      { userId: user.id },
+      { $pull: { boards: { id: boardId } } },
+      { new: true },
+    );
+
+    return this.getBoardOfDatabase({ user, reqBoard });
+  }
+
+  async getBoardOfDatabase({ user, reqBoard }: IGetBoardsProps) {
+    const { query, labels, colors } = reqBoard;
+    const { skip, limit } = paginationParams(reqBoard);
 
     const result: any = await this.taskModel.findOne({ userId: user.id });
     const boards = result ? result.boards : [];
@@ -44,63 +95,5 @@ export class TaskService {
     const slicedBoards = filteredResult.slice(skip, skip + +limit);
 
     return { boards: slicedBoards, totalBoards };
-  }
-
-  async addBoard({ user, taskDto }) {
-    try {
-      const board = await this.taskModel.findOne({ userId: user.id });
-
-      if (board) {
-        const updatedBoard = await this.taskModel.findOneAndUpdate(
-          { userId: user.id },
-          { $push: { boards: { id: uuidv4(), ...taskDto } } },
-          { new: true },
-        );
-        const totalBoards = updatedBoard.boards.length;
-        return { boards: updatedBoard.boards, totalBoards };
-      } else {
-        const createdBoard = await this.taskModel.create({
-          userId: user.id,
-          boards: [{ id: uuidv4(), ...taskDto }],
-        });
-
-        const totalBoards = createdBoard.boards.length;
-        return { boards: createdBoard.boards, totalBoards };
-      }
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  }
-
-  async updateBoard({ user, boardId, taskDto }) {
-    try {
-      const updatedAllBoards = await this.taskModel.findOneAndUpdate(
-        { userId: user.id, 'boards.id': boardId },
-        { $set: { 'boards.$': { id: boardId, ...taskDto } } },
-        { new: true },
-      );
-
-      const updatedBoard =
-        updatedAllBoards?.boards.find((board) => board.id === boardId) ?? null;
-
-      return updatedBoard;
-    } catch (err) {
-      throw new Error(err.message);
-    }
-  }
-
-  async deleteBoard({ user, boardId }) {
-    try {
-      const updatedBoards = await this.taskModel.findOneAndUpdate(
-        { userId: user.id },
-        { $pull: { boards: { id: boardId } } },
-        { new: true },
-      );
-
-      const totalBoards = updatedBoards.boards.length;
-      return { boards: updatedBoards.boards, totalBoards };
-    } catch (err) {
-      throw new Error(err.message);
-    }
   }
 }

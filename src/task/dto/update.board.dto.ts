@@ -2,7 +2,6 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
-  IsNotEmpty,
   IsString,
   ValidateNested,
 } from 'class-validator';
@@ -53,10 +52,7 @@ class Card {
   labels: Label[];
 }
 
-class Board {
-  @IsString()
-  id: string;
-
+export class CreateBoardDto {
   @IsString()
   title: string;
 
@@ -67,15 +63,4 @@ class Board {
   @ValidateNested({ each: true })
   @Type(() => Card)
   cards: Card[];
-}
-
-export class CreateTaskDto {
-  @IsNotEmpty()
-  @IsString()
-  userId: string;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Board)
-  boards: Board[];
 }

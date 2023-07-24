@@ -1,21 +1,16 @@
-interface PaginationParams {
-  page: number;
-  limit: number;
-  sort: string;
-}
+import { RequestTaskDto } from '../task/dto/req.task.dto';
 
 interface ProcessedPaginationParams {
   skip: number;
   limit: number;
-  sort: string;
 }
 
 export const paginationParams = (
-  query: PaginationParams,
+  query: RequestTaskDto,
 ): ProcessedPaginationParams => {
-  const { page = 1, limit = 10, sort = 'desc' } = query;
+  const { page = 1, limit = 10 } = query;
   const parsedLimit = limit > 15 || limit < 0 ? 15 : limit;
   const skip = (page - 1) * parsedLimit;
 
-  return { skip, limit: parsedLimit, sort: sort.toString() };
+  return { skip, limit: parsedLimit };
 };

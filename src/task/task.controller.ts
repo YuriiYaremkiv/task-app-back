@@ -10,9 +10,11 @@ import {
   Patch,
   Query,
 } from '@nestjs/common';
-import { TaskService } from './task.service';
-import { CreateTaskDto } from './dto/create-task.dto';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
+import { TaskService } from './task.service';
+import { RequestTaskDto } from './dto/req.task.dto';
+import { CreateBoardDto } from './dto/create.board.dto';
+import { CustomRequest } from 'interfaces';
 
 @Controller('board')
 export class TaskController {
@@ -20,33 +22,41 @@ export class TaskController {
 
   @UseGuards(AccessTokenGuard)
   @Get()
-  getBoards(@Request() req: any, @Query() queryParam: any) {
+  getBoards(@Request() req: CustomRequest, @Query() reqBoard: RequestTaskDto) {
     const user = req.user;
-    return this.taskService.getBoards({ user, queryParam });
+    return this.taskService.getBoards({ user, reqBoard });
   }
 
   @UseGuards(AccessTokenGuard)
   @Post()
-  addBoard(@Request() req: any, @Body() taskDto: CreateTaskDto) {
+  addBoard(
+    @Request() req: CustomRequest,
+    @Query() reqBoard: RequestTaskDto,
+    @Body() newBoard: CreateBoardDto,
+  ) {
     const user = req.user;
-    return this.taskService.addBoard({ user, taskDto });
+    return this.taskService.addBoard({ user, newBoard, reqBoard });
   }
 
   @UseGuards(AccessTokenGuard)
   @Patch(':boardId')
   updateBoard(
-    @Request() req: any,
     @Param('boardId') boardId: string,
-    @Body() taskDto: CreateTaskDto,
+    @Request() req: CustomRequest,
+    @Body() updatedBoard: CreateBoardDto,
   ) {
     const user = req.user;
-    return this.taskService.updateBoard({ user, boardId, taskDto });
+    return this.taskService.updateBoard({ user, boardId, updatedBoard });
   }
 
   @UseGuards(AccessTokenGuard)
   @Delete(':boardId')
-  deleteBoard(@Request() req: any, @Param('boardId') boardId: string) {
+  deleteBoard(
+    @Param('boardId') boardId: string,
+    @Request() req: CustomRequest,
+    @Query() reqBoard: RequestTaskDto,
+  ) {
     const user = req.user;
-    return this.taskService.deleteBoard({ user, boardId });
+    return this.taskService.deleteBoard({ user, boardId, reqBoard });
   }
 }
