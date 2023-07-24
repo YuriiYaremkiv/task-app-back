@@ -27,6 +27,11 @@ export class RequestTaskDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
+  readonly sort: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
   readonly query?: string;
 
   @IsOptional()

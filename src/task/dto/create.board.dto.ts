@@ -1,33 +1,38 @@
 import {
   IsArray,
-  IsBoolean,
-  IsDateString,
-  IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
+  IsDefined,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 class Label {
   @IsString()
+  @MaxLength(40)
   color: string;
 
   @IsString()
+  @MaxLength(100)
   text: string;
 }
 
 export class CreateBoardDto {
   @IsString()
+  @MaxLength(40)
+  @IsDefined()
   title: string;
 
   @IsString()
+  @MaxLength(20)
+  @IsDefined()
   color: string;
 
   @IsArray()
-  @Type(() => Label)
   @ValidateNested({ each: true })
+  @IsDefined()
   labels: Label[];
 
   @IsArray()
+  @IsDefined()
   cards: [];
 }

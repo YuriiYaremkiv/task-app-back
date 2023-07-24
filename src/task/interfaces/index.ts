@@ -12,3 +12,8 @@ export interface IAddBoardProps {
   newBoard: CreateBoardDto;
   reqBoard: RequestTaskDto;
 }
+
+export interface ILabel {
+  label: string;
+  color: string;
+}

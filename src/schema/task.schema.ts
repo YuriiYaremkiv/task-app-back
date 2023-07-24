@@ -13,8 +13,10 @@ export class Task {
     {
       id: string;
       title: string;
-      labels: [{ text: string; color: string }];
       color: string;
+      created: Date;
+      updated: Date;
+      labels: [{ text: string; color: string }];
       cards: [
         {
           id: string;
